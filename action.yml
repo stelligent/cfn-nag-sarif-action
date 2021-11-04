@@ -1,0 +1,25 @@
+---
+name: 'cfn-nag-sarif-upload'
+author: 'Kevin Formsma'
+description: Execute cfn_nag_scan against the code in the repository and upload sarif results to code scanning.
+branding:
+  icon: search
+  color: orange
+inputs:
+  input_path:
+    description: 'Where cfn_nag_scan should scan for violations (default: $GITHUB_WORKSPACE).'
+    default: '.'
+  extra_args:
+    description: 'Additional arguments to pass to cfn_nag_scan, separated by space (default: "").'
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - uses: stelligent/cfn_nag@master
+      with:
+        input_path: '${{ inputs.input_path }}'
+        extra_args: '${{ inputs.extra_args }} -o sarif'
+        output_path: cfn_nag.sarif
+    - uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: cfn_nag.sarif
